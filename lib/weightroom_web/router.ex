@@ -3,14 +3,27 @@ defmodule WeightroomWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+
+    plug(
+      Guardian.Plug.Pipeline,
+      error_handler: WeightroomWeb.SessionController,
+      module: Weightroom.Accounts.Guardian
+    )
+
+    plug(Guardian.Plug.VerifyHeader, realm: "Token")
+    plug(Guardian.Plug.LoadResource, allow_blank: true)
   end
 
   scope "/api", WeightroomWeb do
     pipe_through :api
 
-    resources "/users", UserController do
-      resources "/weights", UserWeightController
-    end
+    get "/user", UserController, :current_user
+    put "/user", UserController, :update
+
+    resources "/users", UserController, only: [:index, :show]
+
+    post "/register", SessionController, :register
+    post "/login", SessionController, :login
   end
 
   # Enables LiveDashboard only for development

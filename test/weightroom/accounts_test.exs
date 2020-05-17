@@ -1,68 +1,127 @@
 defmodule Weightroom.AccountsTest do
   use Weightroom.DataCase
 
+  import Weightroom.Factory
+
   alias Weightroom.Accounts
+  alias Weightroom.Accounts.Auth
 
   describe "users" do
     alias Weightroom.Accounts.User
 
-    @valid_attrs %{email: "some email", password: "some password", username: "some username"}
-    @update_attrs %{email: "some updated email", password: "some updated password", username: "some updated username"}
+    @valid_attrs %{email: "test@mail.com", password: "password", username: "test"}
+    @update_attrs %{
+      email: "testupdate@mail.com",
+      password: "passwordupdate",
+      username: "testupdate"
+    }
     @invalid_attrs %{email: nil, password: nil, username: nil}
 
-    def user_fixture(attrs \\ %{}) do
-      {:ok, user} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Accounts.create_user()
-
-      user
-    end
-
     test "list_users/0 returns all users" do
-      user = user_fixture()
-      assert Accounts.list_users() == [user]
+      assert Accounts.list_users() == []
+
+      users = insert_list(5, :user)
+      expected_user_ids = users |> Enum.map(fn user -> user.id end)
+      actual_user_ids = Accounts.list_users() |> Enum.map(fn user -> user.id end)
+      assert expected_user_ids == actual_user_ids
     end
 
-    test "get_user!/1 returns the user with given id" do
-      user = user_fixture()
-      assert Accounts.get_user!(user.id) == user
+    test "get_user/1 returns existing user" do
+      user = insert(:user)
+      assert user == Accounts.get_user(user.id)
     end
 
-    test "create_user/1 with valid data creates a user" do
-      assert {:ok, %User{} = user} = Accounts.create_user(@valid_attrs)
-      assert user.email == "some email"
-      assert user.password == "some password"
-      assert user.username == "some username"
+    test "get_user/1 returns nil with bad user id" do
+      assert Accounts.get_user(-1) == nil
     end
 
-    test "create_user/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Accounts.create_user(@invalid_attrs)
+    test "register/1 with valid data creates a user" do
+      assert {:ok, %User{} = user} = Auth.register(@valid_attrs)
+      assert user.username == @valid_attrs.username
+      assert user.email == @valid_attrs.email
+
+      # Make sure password is hashed
+      assert user.password != @valid_attrs.password
+      assert Argon2.verify_pass(@valid_attrs.password, user.password)
     end
 
-    test "update_user/2 with valid data updates the user" do
-      user = user_fixture()
+    test "register/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Auth.register(@invalid_attrs)
+
+      user = insert(:user)
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Auth.register(Map.merge(@valid_attrs, %{username: user.username}))
+
+      assert Keyword.has_key?(changeset.errors, :username)
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Auth.register(Map.merge(@valid_attrs, %{email: user.email}))
+
+      assert Keyword.has_key?(changeset.errors, :email)
+    end
+
+    test "authenticate_user/2 with valid credentials returns user" do
+      Auth.register(@valid_attrs)
+
+      assert {:ok, %User{} = user} =
+               Auth.authenticate_user(@valid_attrs.username, @valid_attrs.password)
+
+      assert user.username == @valid_attrs.username
+      assert user.email == @valid_attrs.email
+    end
+
+    test "authenticate_user/2 with invalid credentials returns error" do
+      assert {:error, :invalid_credentials} = Auth.authenticate_user("nouser", "password")
+
+      Auth.register(@valid_attrs)
+
+      assert {:error, :invalid_credentials} =
+               Auth.authenticate_user(@valid_attrs.username, "badpassword")
+    end
+
+    test "update_user/2 with valid data updates user" do
+      user = insert(:user)
+
       assert {:ok, %User{} = user} = Accounts.update_user(user, @update_attrs)
-      assert user.email == "some updated email"
-      assert user.password == "some updated password"
-      assert user.username == "some updated username"
+      assert user.username == @update_attrs.username
+      assert user.email == @update_attrs.email
+      assert user.password == @update_attrs.password
     end
 
     test "update_user/2 with invalid data returns error changeset" do
-      user = user_fixture()
-      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, @invalid_attrs)
-      assert user == Accounts.get_user!(user.id)
-    end
+      user = insert(:user)
 
-    test "delete_user/1 deletes the user" do
-      user = user_fixture()
-      assert {:ok, %User{}} = Accounts.delete_user(user)
-      assert_raise Ecto.NoResultsError, fn -> Accounts.get_user!(user.id) end
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_user(user, @invalid_attrs)
+
+      user2 = insert(:user)
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Accounts.update_user(user, Map.merge(@valid_attrs, %{username: user2.username}))
+
+      assert Keyword.has_key?(changeset.errors, :username)
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Accounts.update_user(user, Map.merge(@valid_attrs, %{email: user2.email}))
+
+      assert Keyword.has_key?(changeset.errors, :email)
     end
 
     test "change_user/1 returns a user changeset" do
-      user = user_fixture()
+      user = insert(:user)
       assert %Ecto.Changeset{} = Accounts.change_user(user)
+    end
+
+    test "change_user/1 with invalid data returns error changeset" do
+      user = insert(:user)
+      changeset = Accounts.change_user(user, @invalid_attrs)
+      assert changeset.valid? == false
+
+      changeset = Accounts.change_user(user, %{password: "short"})
+      assert Keyword.has_key?(changeset.errors, :password)
+
+      changeset = Accounts.change_user(user, %{email: "badformat"})
+      assert Keyword.has_key?(changeset.errors, :email)
     end
   end
 end

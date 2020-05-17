@@ -22,7 +22,7 @@ defmodule Weightroom.Accounts.User do
     |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 6)
-    |> unique_constraint(:username)
-    |> unique_constraint(:email)
+    |> unique_constraint(:username, name: :users_username_index)
+    |> unique_constraint(:email, name: :users_email_index)
   end
 end

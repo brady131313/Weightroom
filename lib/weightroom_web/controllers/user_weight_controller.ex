@@ -13,5 +13,4 @@ defmodule WeightroomWeb.UserWeightController do
     user_weight = Accounts.get_user_weight!(id)
     render(conn, "show.json", user_weight: user_weight)
   end
-
 end

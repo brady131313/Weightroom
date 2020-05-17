@@ -11,9 +11,6 @@ defmodule WeightroomWeb.UserWeightView do
   end
 
   def render("user_weight.json", %{user_weight: user_weight}) do
-    %{id: user_weight.id,
-      weight: user_weight.weight,
-      inserted_at: user_weight.inserted_at}
+    %{id: user_weight.id, weight: user_weight.weight, inserted_at: user_weight.inserted_at}
   end
-
 end

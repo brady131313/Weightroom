@@ -23,8 +23,10 @@ defmodule WeightroomWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import WeightroomWeb.ConnCase
+      import WeightroomWeb.ConnCaseHelper
 
       alias WeightroomWeb.Router.Helpers, as: Routes
+
 
       # The default endpoint for testing
       @endpoint WeightroomWeb.Endpoint

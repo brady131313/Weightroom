@@ -44,7 +44,9 @@ defmodule Weightroom.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:guardian, "~> 2.0"},
-      {:argon2_elixir, "~> 2.0"}
+      {:comeonin, "~> 5.0"},
+      {:argon2_elixir, "~> 2.0"},
+      {:ex_machina, "~> 2.4", only: :test}
     ]
   end
 
@@ -59,7 +61,7 @@ defmodule Weightroom.MixProject do
       setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.drop", "ecto.create", "ecto.migrate", "test"]
     ]
   end
 end

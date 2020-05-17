@@ -9,6 +9,10 @@ config :weightroom, Weightroom.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :weightroom, Weightroom.Accounts.Guardian,
+  issuer: "weightroom",
+  secret_key: "hckX1NIPqX1RTPxvkW6UPNHxhJX2Y0CePl6+T73mIJVxnXh9wUblQxaGgbpHWeb3"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

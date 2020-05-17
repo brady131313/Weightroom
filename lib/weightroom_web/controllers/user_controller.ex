@@ -1,43 +1,64 @@
 defmodule WeightroomWeb.UserController do
   use WeightroomWeb, :controller
+  use WeightroomWeb.GuardedController
 
+  import Ecto.Query, only: [from: 2]
+
+  alias Weightroom.Repo
   alias Weightroom.Accounts
-  alias Weightroom.Accounts.User
+  alias Weightroom.Accounts.{User, Auth, UserWeight}
 
   action_fallback WeightroomWeb.FallbackController
 
-  def index(conn, _params) do
+  plug(Guardian.Plug.EnsureAuthenticated when action in [:current_user, :update])
+
+  def index(conn, _, _) do
     users = Accounts.list_users()
     render(conn, "index.json", users: users)
   end
 
-  def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
-      |> render("show.json", user: user)
+  def show(conn, %{"id" => user_id}, current_user) do
+    case Accounts.get_user(user_id) do
+      user ->
+        if current_user == nil do
+          render(conn, "show.json", user: %{user | weights: []})
+        else
+          user = Accounts.list_user_weights(user)
+          render(conn, "show.json", user: user)
+        end
+
+      nil ->
+        render(conn, "error.json", message: "User not found")
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
-    render(conn, "show.json", user: user)
-  end
+  def current_user(conn, _params, user) do
+    jwt = Accounts.Guardian.Plug.current_token(conn)
 
-  def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Accounts.get_user!(id)
+    case user do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> render(WeightroomWeb.ErrorView, "403.json", [])
 
-    with {:ok, %User{} = user} <- Accounts.update_user(user, user_params) do
-      render(conn, "show.json", user: user)
+      _ ->
+        user = Accounts.list_user_weights(user)
+        conn
+        |> put_status(:ok)
+        |> render("show.json", %{jwt: jwt, user: user})
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    user = Accounts.get_user!(id)
+  def update(conn, %{"user" => user_params}, user) do
+    jwt = Accounts.Guardian.Plug.current_token(conn)
 
-    with {:ok, %User{}} <- Accounts.delete_user(user) do
-      send_resp(conn, :no_content, "")
+    case Accounts.update_user(user, user_params) do
+      {:ok, user} ->
+        user = Accounts.list_user_weights(user)
+        render(conn, "show.json", %{jwt: jwt, user: user})
+
+      {:error, changeset} ->
+        render(conn, WeightroomWeb.ChangesetView, "error.json", changeset: changeset)
     end
   end
 end
