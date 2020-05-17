@@ -107,7 +107,7 @@ defmodule WeightroomWeb.UserControllerTest do
     end
 
     test "returns error message when user is not authenticated", %{conn: conn} do
-      user = fixture(:user)
+      fixture(:user)
       conn = put(conn, Routes.user_path(conn, :update, %{"user" => @update_attrs}))
 
       response = json_response(conn, 403)

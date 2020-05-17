@@ -4,10 +4,9 @@ defmodule Weightroom.AccountsTest do
   import Weightroom.Factory
 
   alias Weightroom.Accounts
-  alias Weightroom.Accounts.Auth
+  alias Weightroom.Accounts.{Auth, User}
 
   describe "users" do
-    alias Weightroom.Accounts.User
 
     @valid_attrs %{email: "test@mail.com", password: "password", username: "test"}
     @update_attrs %{
@@ -122,6 +121,22 @@ defmodule Weightroom.AccountsTest do
 
       changeset = Accounts.change_user(user, %{email: "badformat"})
       assert Keyword.has_key?(changeset.errors, :email)
+    end
+  end
+
+  describe "users weight" do
+    setup do
+      {:ok, user} = Auth.register(%{username: "test", email: "test@mail.com", password: "password"})
+      {:ok, %{user: user}}
+    end
+
+    test "list_user_weights/0 with valid user returns user preloaded with weights", %{user: user} do
+      assert Accounts.list_user_weights(user).weights == []
+
+      weights = insert_list(5, :user_weight, user: user)
+      expected_weight_ids = weights |> Enum.map(fn weight -> weight.id end)
+      actual_weight_ids = Accounts.list_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
+      assert expected_weight_ids == actual_weight_ids
     end
   end
 end

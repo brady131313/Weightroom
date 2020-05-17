@@ -14,21 +14,21 @@ defmodule WeightroomWeb.UserController do
 
   def index(conn, _, _) do
     users = Accounts.list_users()
-    render(conn, "index.json", users: users)
+    render(conn, "index.json", %{users: users})
   end
 
   def show(conn, %{"id" => user_id}, current_user) do
     case Accounts.get_user(user_id) do
       user ->
         if current_user == nil do
-          render(conn, "show.json", user: %{user | weights: []})
+          render(conn, "show.json", %{user: %{user | weights: []}})
         else
           user = Accounts.list_user_weights(user)
-          render(conn, "show.json", user: user)
+          render(conn, "show.json", %{user: user})
         end
 
       nil ->
-        render(conn, "error.json", message: "User not found")
+        render(conn, "error.json", %{message: "User not found"})
     end
   end
 
@@ -39,7 +39,8 @@ defmodule WeightroomWeb.UserController do
       nil ->
         conn
         |> put_status(:not_found)
-        |> render(WeightroomWeb.ErrorView, "403.json", [])
+        |> put_view(WeightroomWeb.ErrorView)
+        |> render("403.json", [])
 
       _ ->
         user = Accounts.list_user_weights(user)
@@ -58,7 +59,9 @@ defmodule WeightroomWeb.UserController do
         render(conn, "show.json", %{jwt: jwt, user: user})
 
       {:error, changeset} ->
-        render(conn, WeightroomWeb.ChangesetView, "error.json", changeset: changeset)
+        conn
+        |> put_view(WeightroomWeb.ChangesetView)
+        |> render("error.json", changeset: changeset)
     end
   end
 end

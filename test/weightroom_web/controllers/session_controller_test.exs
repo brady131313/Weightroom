@@ -2,7 +2,6 @@ defmodule WeightroomWeb.SessionControllerTest do
   use WeightroomWeb.ConnCase
 
   alias Weightroom.Accounts
-  alias WeightroomWeb.UserView
 
   @create_attrs %{
     email: "test@mail.com",
@@ -39,7 +38,7 @@ defmodule WeightroomWeb.SessionControllerTest do
 
   describe "login" do
     test "with valid credentials returns user and token", %{conn: conn} do
-      {:ok, user} = Accounts.Auth.register(@create_attrs)
+      {:ok, _} = Accounts.Auth.register(@create_attrs)
       conn = post(conn, Routes.session_path(conn, :login, %{"user" => %{"username" => @create_attrs.username, "password" => @create_attrs.password}}))
 
       response = json_response(conn, 201)["data"]

@@ -13,13 +13,16 @@ defmodule WeightroomWeb.SessionController do
 
         conn
         |> put_status(:created)
-        |> render(WeightroomWeb.UserView, "show.json", %{
+        |> put_view(WeightroomWeb.UserView)
+        |> render("show.json", %{
           jwt: jwt,
           user: Map.merge(user, %{weights: []})
         })
 
       {:error, changeset} ->
-        render(conn, WeightroomWeb.ChangesetView, "error.json", changeset: changeset)
+        conn
+        |> put_view(WeightroomWeb.ChangesetView)
+        |> render("error.json", %{changeset: changeset})
     end
   end
 
@@ -33,18 +36,21 @@ defmodule WeightroomWeb.SessionController do
 
         conn
         |> put_status(:created)
-        |> render(WeightroomWeb.UserView, "login.json", jwt: jwt, user: user)
+        |> put_view(WeightroomWeb.UserView)
+        |> render("login.json", %{jwt: jwt, user: user})
 
       {:error, message} ->
         conn
         |> put_status(401)
-        |> render(WeightroomWeb.UserView, "error.json", message: message)
+        |> put_view(WeightroomWeb.UserView)
+        |> render("error.json", %{message: message})
     end
   end
 
   def auth_error(conn, {_type, _reason}, _opts) do
     conn
     |> put_status(:forbidden)
-    |> render(WeightroomWeb.UserView, "error.json", message: "Not Authenticated")
+    |> put_view(WeightroomWeb.UserView)
+    |> render("error.json", %{message: "Not Authenticated"})
   end
 end
