@@ -188,7 +188,9 @@ defmodule Weightroom.AccountsTest do
       user: user,
       user_weight: user_weight
     } do
-      user_weights = Accounts.list_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
+      user_weights =
+        Accounts.list_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
+
       assert user_weight.id in user_weights
 
       assert Accounts.delete_user_weight(user_weight) == []

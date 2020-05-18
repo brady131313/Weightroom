@@ -38,10 +38,13 @@ defmodule Weightroom.Accounts do
     )
   end
 
-  defp get_users_weights(user_id) do
-    Repo.all(from(w in UserWeight,
-                       where: w.user_id == ^user_id,
-                       order_by: [desc: w.inserted_at]))
+  def get_users_weights(user_id) do
+    Repo.all(
+      from(w in UserWeight,
+        where: w.user_id == ^user_id,
+        order_by: [desc: w.inserted_at]
+      )
+    )
   end
 
   def create_user_weight(attrs \\ %{}) do

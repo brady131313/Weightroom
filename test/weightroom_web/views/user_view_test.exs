@@ -31,7 +31,4 @@ defmodule WeightroomWeb.UserViewTest do
              user: Map.put(render(WeightroomWeb.UserView, "user.json", user: user), :weights, [])
            }
   end
-
-  test "renders login.json" do
-  end
 end

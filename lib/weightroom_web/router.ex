@@ -20,6 +20,8 @@ defmodule WeightroomWeb.Router do
     get "/user", UserController, :current_user
     put "/user", UserController, :update
 
+    resources "/user/weights", UserWeightController, only: [:index, :create, :update, :delete]
+
     resources "/users", UserController, only: [:index, :show]
 
     post "/register", SessionController, :register

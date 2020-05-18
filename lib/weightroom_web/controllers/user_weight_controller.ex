@@ -1,16 +1,27 @@
 defmodule WeightroomWeb.UserWeightController do
   use WeightroomWeb, :controller
+  use WeightroomWeb.GuardedController
 
   alias Weightroom.Accounts
-  alias Weightroom.Accounts.UserWeight
 
-  def index(conn, %{"user_id" => user_id}) do
-    user_weights = Accounts.list_user_weights(user_id)
+  action_fallback WeightroomWeb.FallbackController
+
+  plug(Guardian.Plug.EnsureAuthenticated when action in [:index, :create, :update, :delete])
+
+  def index(conn, _params, current_user) do
+    user_weights = Accounts.get_users_weights(current_user.id)
     render(conn, "index.json", user_weights: user_weights)
   end
 
-  def show(conn, %{"id" => id}) do
-    user_weight = Accounts.get_user_weight!(id)
-    render(conn, "show.json", user_weight: user_weight)
+  def create(conn, %{"user_weight" => weight_params}, current_user) do
+    case Accounts.create_user_weight(Map.merge(weight_params, %{"user_id" => current_user.id})) do
+      {:error, changeset} ->
+        conn
+        |> put_view(WeightroomWeb.ChangesetView)
+        |> render("error.json", changeset: changeset)
+
+      user_weights ->
+        render(conn, "index.json", user_weights: user_weights)
+    end
   end
 end
