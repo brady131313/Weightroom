@@ -38,5 +38,57 @@ defmodule Weightroom.Accounts do
     )
   end
 
-  def get_user_weight!(id), do: Repo.get(UserWeight, id)
+  defp get_users_weights(user_id) do
+    Repo.all(from(w in UserWeight,
+                       where: w.user_id == ^user_id,
+                       order_by: [desc: w.inserted_at]))
+  end
+
+  def create_user_weight(attrs \\ %{}) do
+    result =
+      %UserWeight{}
+      |> UserWeight.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:error, changeset} ->
+        {:error, changeset}
+
+      {:ok, user_weight} ->
+        get_users_weights(user_weight.user_id)
+    end
+  end
+
+  def update_user_weight(%UserWeight{} = user_weight, attrs) do
+    result =
+      user_weight
+      |> UserWeight.changeset(attrs)
+      |> Repo.update()
+
+    case result do
+      {:error, changeset} ->
+        {:error, changeset}
+
+      {:ok, user_weight} ->
+        get_users_weights(user_weight.user_id)
+    end
+  end
+
+  def delete_user_weight(%UserWeight{} = user_weight) do
+    result =
+      user_weight
+      |> Repo.delete()
+
+    case result do
+      {:error, changeset} ->
+        {:error, changeset}
+
+      {:ok, user_weight} ->
+        get_users_weights(user_weight.user_id)
+    end
+  end
+
+  def change_user_weight(%UserWeight{} = user_weight, attrs \\ %{}) do
+    UserWeight.changeset(user_weight, attrs)
+  end
 end

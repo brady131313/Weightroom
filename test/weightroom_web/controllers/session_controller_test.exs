@@ -39,7 +39,17 @@ defmodule WeightroomWeb.SessionControllerTest do
   describe "login" do
     test "with valid credentials returns user and token", %{conn: conn} do
       {:ok, _} = Accounts.Auth.register(@create_attrs)
-      conn = post(conn, Routes.session_path(conn, :login, %{"user" => %{"username" => @create_attrs.username, "password" => @create_attrs.password}}))
+
+      conn =
+        post(
+          conn,
+          Routes.session_path(conn, :login, %{
+            "user" => %{
+              "username" => @create_attrs.username,
+              "password" => @create_attrs.password
+            }
+          })
+        )
 
       response = json_response(conn, 201)["data"]
       assert response["user"]["username"] == @create_attrs.username
@@ -48,11 +58,16 @@ defmodule WeightroomWeb.SessionControllerTest do
     end
 
     test "with invalid credentials returns error", %{conn: conn} do
-      conn = post(conn, Routes.session_path(conn, :login, %{"user" => %{"username" => "bad", "password" => "password"}}))
+      conn =
+        post(
+          conn,
+          Routes.session_path(conn, :login, %{
+            "user" => %{"username" => "bad", "password" => "password"}
+          })
+        )
 
       response = json_response(conn, 401)
       assert response["message"] != nil
     end
   end
-
 end

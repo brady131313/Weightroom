@@ -27,7 +27,6 @@ defmodule WeightroomWeb.ConnCase do
 
       alias WeightroomWeb.Router.Helpers, as: Routes
 
-
       # The default endpoint for testing
       @endpoint WeightroomWeb.Endpoint
     end

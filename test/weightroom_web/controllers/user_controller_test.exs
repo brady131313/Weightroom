@@ -97,12 +97,22 @@ defmodule WeightroomWeb.UserControllerTest do
   describe "update" do
     test "returns updated user", %{conn: conn} do
       user = fixture(:user)
-      conn = put(secure_conn(conn, user), Routes.user_path(conn, :update, %{"user" => @update_attrs}))
+
+      conn =
+        put(secure_conn(conn, user), Routes.user_path(conn, :update, %{"user" => @update_attrs}))
+
       jwt = Accounts.Guardian.Plug.current_token(conn)
 
       user = Accounts.list_user_weights(user)
       response = json_response(conn, 200)
-      updated_user = %{user | username: @update_attrs.username, email: @update_attrs.email, password: @update_attrs.password}
+
+      updated_user = %{
+        user
+        | username: @update_attrs.username,
+          email: @update_attrs.email,
+          password: @update_attrs.password
+      }
+
       assert response == render_json(UserView, "show.json", user: updated_user, jwt: jwt)
     end
 
@@ -116,11 +126,12 @@ defmodule WeightroomWeb.UserControllerTest do
 
     test "returns error message when user updates with invalid data", %{conn: conn} do
       user = fixture(:user)
-      conn = put(secure_conn(conn, user), Routes.user_path(conn, :update, %{"user" => @invalid_attrs}))
+
+      conn =
+        put(secure_conn(conn, user), Routes.user_path(conn, :update, %{"user" => @invalid_attrs}))
 
       response = json_response(conn, 200)
       assert Map.has_key?(response, "errors")
     end
   end
-
 end

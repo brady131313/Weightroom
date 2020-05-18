@@ -33,6 +33,5 @@ defmodule WeightroomWeb.UserViewTest do
   end
 
   test "renders login.json" do
-
   end
 end

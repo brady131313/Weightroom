@@ -44,6 +44,7 @@ defmodule WeightroomWeb.UserController do
 
       _ ->
         user = Accounts.list_user_weights(user)
+
         conn
         |> put_status(:ok)
         |> render("show.json", %{jwt: jwt, user: user})
