@@ -9,7 +9,7 @@ defmodule WeightroomWeb.UserWeightController do
   plug(Guardian.Plug.EnsureAuthenticated when action in [:index, :create, :update, :delete])
 
   def index(conn, _params, current_user) do
-    user_weights = Accounts.get_users_weights(current_user.id)
+    user_weights = Accounts.get_user_weights(current_user.id)
     render(conn, "index.json", user_weights: user_weights)
   end
 
@@ -20,8 +20,11 @@ defmodule WeightroomWeb.UserWeightController do
         |> put_view(WeightroomWeb.ChangesetView)
         |> render("error.json", changeset: changeset)
 
-      user_weights ->
+      {:ok, user_weights} ->
         render(conn, "index.json", user_weights: user_weights)
     end
+  end
+
+  def update(conn, %{"id" => weight_id, "user_weight" => weight_params}, current_user) do
   end
 end

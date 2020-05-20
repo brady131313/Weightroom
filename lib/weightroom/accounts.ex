@@ -12,7 +12,15 @@ defmodule Weightroom.Accounts do
     Repo.all(User)
   end
 
-  def get_user(id), do: Repo.get(User, id)
+  def get_user(id) do
+    case Repo.get(User, id) do
+      nil ->
+        {:error, :not_found}
+
+      user ->
+        {:ok, user}
+    end
+  end
 
   def update_user(%User{} = user, attrs) do
     user
@@ -38,13 +46,17 @@ defmodule Weightroom.Accounts do
     )
   end
 
-  def get_users_weights(user_id) do
-    Repo.all(
-      from(w in UserWeight,
-        where: w.user_id == ^user_id,
-        order_by: [desc: w.inserted_at]
-      )
-    )
+  def get_user_weights(user_id) do
+    result = get_user(user_id)
+    case result do
+      {:ok, user} ->
+        Repo.all(
+          from(w in UserWeight,
+            where: w.user_id == ^user_id,
+            order_by: [desc: w.inserted_at])
+        )
+      _ -> result
+    end
   end
 
   def create_user_weight(attrs \\ %{}) do
@@ -58,7 +70,7 @@ defmodule Weightroom.Accounts do
         {:error, changeset}
 
       {:ok, user_weight} ->
-        get_users_weights(user_weight.user_id)
+        {:ok, get_user_weights(user_weight.user_id)}
     end
   end
 
@@ -73,7 +85,7 @@ defmodule Weightroom.Accounts do
         {:error, changeset}
 
       {:ok, user_weight} ->
-        get_users_weights(user_weight.user_id)
+        {:ok, get_user_weights(user_weight.user_id)}
     end
   end
 
@@ -87,7 +99,7 @@ defmodule Weightroom.Accounts do
         {:error, changeset}
 
       {:ok, user_weight} ->
-        get_users_weights(user_weight.user_id)
+        {:ok, get_user_weights(user_weight.user_id)}
     end
   end
 

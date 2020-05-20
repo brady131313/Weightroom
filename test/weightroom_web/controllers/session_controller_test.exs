@@ -31,7 +31,7 @@ defmodule WeightroomWeb.SessionControllerTest do
 
     test "with invalid credentials returns error", %{conn: conn} do
       conn = post(conn, Routes.session_path(conn, :register, %{"user" => @invalid_attrs}))
-      response = json_response(conn, 200)
+      response = json_response(conn, 422)
       assert Map.has_key?(response, "errors")
     end
   end
@@ -67,7 +67,6 @@ defmodule WeightroomWeb.SessionControllerTest do
         )
 
       response = json_response(conn, 401)
-      assert response["message"] != nil
     end
   end
 end

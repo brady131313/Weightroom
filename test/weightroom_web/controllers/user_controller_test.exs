@@ -74,6 +74,11 @@ defmodule WeightroomWeb.UserControllerTest do
       assert response == render_json(UserView, "show.json", user: user)
       assert response["user"]["weights"] != []
     end
+
+    test "show user with invalid user id returns error", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :show, -1))
+      assert json_response(conn, 404)
+    end
   end
 
   describe "current user" do
@@ -130,7 +135,7 @@ defmodule WeightroomWeb.UserControllerTest do
       conn =
         put(secure_conn(conn, user), Routes.user_path(conn, :update, %{"user" => @invalid_attrs}))
 
-      response = json_response(conn, 200)
+      response = json_response(conn, 422)
       assert Map.has_key?(response, "errors")
     end
   end

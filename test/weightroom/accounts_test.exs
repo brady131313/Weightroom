@@ -25,12 +25,13 @@ defmodule Weightroom.AccountsTest do
     end
 
     test "get_user/1 returns existing user" do
-      user = insert(:user)
-      assert user == Accounts.get_user(user.id)
+      inserted_user = insert(:user)
+      assert {:ok, user} = Accounts.get_user(inserted_user.id)
+      assert user == inserted_user
     end
 
     test "get_user/1 returns nil with bad user id" do
-      assert Accounts.get_user(-1) == nil
+      assert {:error, :not_found} = Accounts.get_user(-1)
     end
 
     test "register/1 with valid data creates a user" do
@@ -70,11 +71,11 @@ defmodule Weightroom.AccountsTest do
     end
 
     test "authenticate_user/2 with invalid credentials returns error" do
-      assert {:error, :invalid_credentials} = Auth.authenticate_user("nouser", "password")
+      assert {:error, :unauthorized} = Auth.authenticate_user("nouser", "password")
 
       Auth.register(@valid_attrs)
 
-      assert {:error, :invalid_credentials} =
+      assert {:error, :unauthorized} =
                Auth.authenticate_user(@valid_attrs.username, "badpassword")
     end
 
@@ -152,8 +153,9 @@ defmodule Weightroom.AccountsTest do
     } do
       assert Accounts.list_user_weights(user).weights == []
 
+      assert {:ok, user_weights} = Accounts.create_user_weight(%{weight: 250, user_id: user.id})
       actual_weight_ids =
-        Accounts.create_user_weight(%{weight: 250, user_id: user.id})
+        user_weights
         |> Enum.map(fn weight -> weight.id end)
 
       expected_weight_ids =
@@ -174,7 +176,8 @@ defmodule Weightroom.AccountsTest do
     test "update_user_weight/2 with valid data returns updated list of user weights", %{
       user_weight: user_weight
     } do
-      [updated_user_weight | _] = Accounts.update_user_weight(user_weight, %{weight: 300})
+      assert {:ok, user_weights} = Accounts.update_user_weight(user_weight, %{weight: 300})
+      [updated_user_weight | _] = user_weights
       assert updated_user_weight.weight == Decimal.new(300)
     end
 
@@ -193,7 +196,8 @@ defmodule Weightroom.AccountsTest do
 
       assert user_weight.id in user_weights
 
-      assert Accounts.delete_user_weight(user_weight) == []
+      assert {:ok, user_weights} = Accounts.delete_user_weight(user_weight)
+      assert user_weights == []
     end
 
     test "change_user_weight/2 returns a user weight changeset", %{user_weight: user_weight} do

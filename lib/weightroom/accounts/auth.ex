@@ -11,13 +11,13 @@ defmodule Weightroom.Accounts.Auth do
     case Repo.one(query) do
       nil ->
         Argon2.no_user_verify()
-        {:error, :invalid_credentials}
+        {:error, :unauthorized}
 
       user ->
         if Argon2.verify_pass(password, user.password) do
           {:ok, user}
         else
-          {:error, :invalid_credentials}
+          {:error, :unauthorized}
         end
     end
   end

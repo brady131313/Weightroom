@@ -9,7 +9,7 @@ defmodule Weightroom.Accounts.Guardian do
 
   def resource_from_claims(%{"sub" => id}) do
     case Accounts.get_user(id) do
-      user -> {:ok, user}
+      {:ok, user} -> {:ok, user}
       _ -> {:error, :resource_not_found}
     end
   end
