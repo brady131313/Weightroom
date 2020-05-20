@@ -14,17 +14,22 @@ defmodule WeightroomWeb.UserWeightController do
   end
 
   def create(conn, %{"user_weight" => weight_params}, current_user) do
-    case Accounts.create_user_weight(Map.merge(weight_params, %{"user_id" => current_user.id})) do
-      {:error, changeset} ->
-        conn
-        |> put_view(WeightroomWeb.ChangesetView)
-        |> render("error.json", changeset: changeset)
-
-      {:ok, user_weights} ->
-        render(conn, "index.json", user_weights: user_weights)
+    with {:ok, user_weights} <- Accounts.create_user_weight(Map.merge(weight_params, %{"user_id" => current_user.id})) do
+      render(conn, "index.json", user_weights: user_weights)
     end
   end
 
   def update(conn, %{"id" => weight_id, "user_weight" => weight_params}, current_user) do
+    with {:ok, user_weight} <- Accounts.get_user_weight(weight_id, current_user.id),
+         {:ok, user_weights} <- Accounts.update_user_weight(user_weight, weight_params) do
+      render(conn, "index.json", user_weights: user_weights)
+    end
+  end
+
+  def delete(conn, %{"id" => weight_id}, current_user) do
+    with {:ok, user_weight} <- Accounts.get_user_weight(weight_id, current_user.id),
+         {:ok, user_weights} <- Accounts.delete_user_weight(user_weight) do
+      render(conn, "index.json", user_weights: user_weights)
+    end
   end
 end

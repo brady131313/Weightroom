@@ -59,6 +59,20 @@ defmodule Weightroom.Accounts do
     end
   end
 
+  def get_user_weight(weight_id, user_id) do
+    case Repo.get(UserWeight, weight_id) do
+      nil ->
+        {:error, :not_found}
+
+      weight ->
+        if weight.user_id == user_id do
+          {:ok, weight}
+        else
+          {:error, :not_found}
+        end
+    end
+  end
+
   def create_user_weight(attrs \\ %{}) do
     result =
       %UserWeight{}

@@ -66,7 +66,7 @@ defmodule WeightroomWeb.SessionControllerTest do
           })
         )
 
-      response = json_response(conn, 401)
+      assert response = json_response(conn, 401)
     end
   end
 end
