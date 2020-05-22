@@ -25,4 +25,14 @@ defmodule Weightroom.Factory do
       author: build(:user)
     }
   end
+
+  def workout_factory do
+    %Weightroom.Programs.Workout{
+      comments: "Some Comments",
+      week: 0,
+      day: 0,
+      order: sequence(:order, &(&1)),
+      program: build(:program)
+    }
+  end
 end

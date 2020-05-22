@@ -2,6 +2,7 @@ defmodule Weightroom.Programs.Program do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Accounts.User
+  alias Weightroom.Programs.Workout
 
   schema "programs" do
     field :description, :string
@@ -10,6 +11,7 @@ defmodule Weightroom.Programs.Program do
     field :public, :boolean
 
     belongs_to :author, User, foreign_key: :user_id
+    has_many :workouts, Workout
 
     timestamps()
   end

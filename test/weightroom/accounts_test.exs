@@ -135,7 +135,9 @@ defmodule Weightroom.AccountsTest do
     end
 
     @tag :without_weight
-    test "preload_user_weights/0 with valid user returns user preloaded with weights", %{user: user} do
+    test "preload_user_weights/0 with valid user returns user preloaded with weights", %{
+      user: user
+    } do
       assert Accounts.preload_user_weights(user).weights == []
 
       weights = insert_list(5, :user_weight, user: user)
