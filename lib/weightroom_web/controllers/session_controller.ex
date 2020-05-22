@@ -24,7 +24,8 @@ defmodule WeightroomWeb.SessionController do
     with {:ok, user} <- Auth.authenticate_user(username, password) do
       {:ok, jwt, _} = user |> Accounts.Guardian.encode_and_sign(%{}, token_type: :token)
 
-      user = Accounts.list_user_weights(user)
+      user = Accounts.preload_user_weights(user)
+
       conn
       |> put_status(:created)
       |> put_view(WeightroomWeb.UserView)

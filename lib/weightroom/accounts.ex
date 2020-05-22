@@ -36,7 +36,7 @@ defmodule Weightroom.Accounts do
     User.changeset(user, attrs)
   end
 
-  def list_user_weights(%User{} = user) do
+  def preload_user_weights(%User{} = user) do
     user
     |> Repo.preload(
       weights:
@@ -48,14 +48,18 @@ defmodule Weightroom.Accounts do
 
   def get_user_weights(user_id) do
     result = get_user(user_id)
+
     case result do
       {:ok, user} ->
         Repo.all(
           from(w in UserWeight,
-            where: w.user_id == ^user_id,
-            order_by: [desc: w.inserted_at])
+            where: w.user_id == ^user.id,
+            order_by: [desc: w.inserted_at]
+          )
         )
-      _ -> result
+
+      _ ->
+        result
     end
   end
 

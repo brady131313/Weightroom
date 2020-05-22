@@ -15,4 +15,14 @@ defmodule Weightroom.Factory do
       user: build(:user)
     }
   end
+
+  def program_factory do
+    %Weightroom.Programs.Program{
+      name: sequence(:name, &"Program #{&1}"),
+      description: "Some Description",
+      likes: 5,
+      public: true,
+      author: build(:user)
+    }
+  end
 end

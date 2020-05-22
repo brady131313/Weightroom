@@ -49,13 +49,13 @@ defmodule WeightroomWeb.UserControllerTest do
 
   describe "show" do
     test "show user with valid id", %{conn: conn} do
-      user = fixture(:user) |> Accounts.list_user_weights()
+      user = fixture(:user) |> Accounts.preload_user_weights()
       conn = get(conn, Routes.user_path(conn, :show, user.id))
       assert json_response(conn, 200) == render_json(UserView, "show.json", user: user)
     end
 
     test "show user when not currently logged in, will not show users weights", %{conn: conn} do
-      user = fixture(:user) |> Accounts.list_user_weights()
+      user = fixture(:user) |> Accounts.preload_user_weights()
       insert(:user_weight, user: user)
       conn = get(conn, Routes.user_path(conn, :show, user.id))
 
@@ -69,7 +69,7 @@ defmodule WeightroomWeb.UserControllerTest do
       insert(:user_weight, user: user)
       conn = get(secure_conn(conn, user), Routes.user_path(conn, :show, user.id))
 
-      user = Accounts.list_user_weights(user)
+      user = Accounts.preload_user_weights(user)
       response = json_response(conn, 200)
       assert response == render_json(UserView, "show.json", user: user)
       assert response["user"]["weights"] != []
@@ -87,7 +87,7 @@ defmodule WeightroomWeb.UserControllerTest do
       conn = get(secure_conn(conn, user), Routes.user_path(conn, :current_user))
       jwt = Accounts.Guardian.Plug.current_token(conn)
 
-      user = Accounts.list_user_weights(user)
+      user = Accounts.preload_user_weights(user)
       response = json_response(conn, 200)
       assert response == render_json(UserView, "show.json", user: user, jwt: jwt)
     end
@@ -108,7 +108,7 @@ defmodule WeightroomWeb.UserControllerTest do
 
       jwt = Accounts.Guardian.Plug.current_token(conn)
 
-      user = Accounts.list_user_weights(user)
+      user = Accounts.preload_user_weights(user)
       response = json_response(conn, 200)
 
       updated_user = %{

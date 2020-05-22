@@ -135,14 +135,14 @@ defmodule Weightroom.AccountsTest do
     end
 
     @tag :without_weight
-    test "list_user_weights/0 with valid user returns user preloaded with weights", %{user: user} do
-      assert Accounts.list_user_weights(user).weights == []
+    test "preload_user_weights/0 with valid user returns user preloaded with weights", %{user: user} do
+      assert Accounts.preload_user_weights(user).weights == []
 
       weights = insert_list(5, :user_weight, user: user)
       expected_weight_ids = weights |> Enum.map(fn weight -> weight.id end)
 
       actual_weight_ids =
-        Accounts.list_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
+        Accounts.preload_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
 
       assert expected_weight_ids == actual_weight_ids
     end
@@ -151,15 +151,16 @@ defmodule Weightroom.AccountsTest do
     test "create_user_weight/2 with valid data returns updated list of users weights", %{
       user: user
     } do
-      assert Accounts.list_user_weights(user).weights == []
+      assert Accounts.preload_user_weights(user).weights == []
 
       assert {:ok, user_weights} = Accounts.create_user_weight(%{weight: 250, user_id: user.id})
+
       actual_weight_ids =
         user_weights
         |> Enum.map(fn weight -> weight.id end)
 
       expected_weight_ids =
-        Accounts.list_user_weights(user).weights
+        Accounts.preload_user_weights(user).weights
         |> Enum.map(fn weight -> weight.id end)
 
       assert actual_weight_ids == expected_weight_ids
@@ -170,7 +171,7 @@ defmodule Weightroom.AccountsTest do
       assert {:error, %Ecto.Changeset{}} =
                Accounts.create_user_weight(%{weight: 250, user_id: -1})
 
-      assert Accounts.list_user_weights(user).weights == []
+      assert Accounts.preload_user_weights(user).weights == []
     end
 
     test "update_user_weight/2 with valid data returns updated list of user weights", %{
@@ -192,7 +193,7 @@ defmodule Weightroom.AccountsTest do
       user_weight: user_weight
     } do
       user_weights =
-        Accounts.list_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
+        Accounts.preload_user_weights(user).weights |> Enum.map(fn weight -> weight.id end)
 
       assert user_weight.id in user_weights
 

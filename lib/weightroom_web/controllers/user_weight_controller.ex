@@ -14,7 +14,8 @@ defmodule WeightroomWeb.UserWeightController do
   end
 
   def create(conn, %{"user_weight" => weight_params}, current_user) do
-    with {:ok, user_weights} <- Accounts.create_user_weight(Map.merge(weight_params, %{"user_id" => current_user.id})) do
+    with {:ok, user_weights} <-
+           Accounts.create_user_weight(Map.merge(weight_params, %{"user_id" => current_user.id})) do
       render(conn, "index.json", user_weights: user_weights)
     end
   end

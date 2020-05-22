@@ -2,11 +2,7 @@ defmodule WeightroomWeb.UserController do
   use WeightroomWeb, :controller
   use WeightroomWeb.GuardedController
 
-  import Ecto.Query, only: [from: 2]
-
-  alias Weightroom.Repo
   alias Weightroom.Accounts
-  alias Weightroom.Accounts.{User, Auth, UserWeight}
 
   action_fallback WeightroomWeb.FallbackController
 
@@ -22,7 +18,7 @@ defmodule WeightroomWeb.UserController do
       if current_user == nil do
         render(conn, "show.json", %{user: %{user | weights: []}})
       else
-        user = Accounts.list_user_weights(user)
+        user = Accounts.preload_user_weights(user)
         render(conn, "show.json", %{user: user})
       end
     end
@@ -30,7 +26,7 @@ defmodule WeightroomWeb.UserController do
 
   def current_user(conn, _params, user) do
     jwt = Accounts.Guardian.Plug.current_token(conn)
-    user = Accounts.list_user_weights(user)
+    user = Accounts.preload_user_weights(user)
 
     conn
     |> put_status(:ok)
@@ -41,7 +37,7 @@ defmodule WeightroomWeb.UserController do
     jwt = Accounts.Guardian.Plug.current_token(conn)
 
     with {:ok, user} <- Accounts.update_user(user, user_params) do
-      user = Accounts.list_user_weights(user)
+      user = Accounts.preload_user_weights(user)
       render(conn, "show.json", %{jwt: jwt, user: user})
     end
   end

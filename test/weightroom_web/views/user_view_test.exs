@@ -24,7 +24,7 @@ defmodule WeightroomWeb.UserViewTest do
   end
 
   test "renders show.json" do
-    user = insert(:user) |> Accounts.list_user_weights()
+    user = insert(:user) |> Accounts.preload_user_weights()
     rendered_user = render(WeightroomWeb.UserView, "show.json", user: user)
 
     assert rendered_user == %{

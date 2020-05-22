@@ -98,7 +98,14 @@ defmodule WeightroomWeb.UserWeightControllerTest do
       user: user,
       user_weight: user_weight
     } do
-      conn = put(secure_conn(conn, user), Routes.user_weight_path(conn, :update, user_weight.id, %{"user_weight" => %{weight: 100}}))
+      conn =
+        put(
+          secure_conn(conn, user),
+          Routes.user_weight_path(conn, :update, user_weight.id, %{
+            "user_weight" => %{weight: 100}
+          })
+        )
+
       response = json_response(conn, 200)
 
       user_weights = Accounts.get_user_weights(user.id)
@@ -110,7 +117,12 @@ defmodule WeightroomWeb.UserWeightControllerTest do
       user: user,
       user_weight: user_weight
     } do
-      conn = put(secure_conn(conn, user), Routes.user_weight_path(conn, :update, user_weight.id, %{"user_weight" => %{weight: -1}}))
+      conn =
+        put(
+          secure_conn(conn, user),
+          Routes.user_weight_path(conn, :update, user_weight.id, %{"user_weight" => %{weight: -1}})
+        )
+
       response = json_response(conn, 422)
       assert Map.has_key?(response, "errors")
     end
@@ -119,27 +131,46 @@ defmodule WeightroomWeb.UserWeightControllerTest do
       conn: conn,
       user_weight: user_weight
     } do
-      conn = put(conn, Routes.user_weight_path(conn, :update, user_weight.id, %{"user_weight" => %{weight: 100}}))
+      conn =
+        put(
+          conn,
+          Routes.user_weight_path(conn, :update, user_weight.id, %{
+            "user_weight" => %{weight: 100}
+          })
+        )
+
       response = json_response(conn, 403)
       assert response == %{"message" => "Not Authenticated"}
     end
   end
 
   describe "delete" do
-    test "with valid weight id and authenticated user returns updated list of weights", %{conn: conn, user: user, user_weight: user_weight} do
-      conn = delete(secure_conn(conn, user), Routes.user_weight_path(conn, :delete, user_weight.id))
+    test "with valid weight id and authenticated user returns updated list of weights", %{
+      conn: conn,
+      user: user,
+      user_weight: user_weight
+    } do
+      conn =
+        delete(secure_conn(conn, user), Routes.user_weight_path(conn, :delete, user_weight.id))
+
       response = json_response(conn, 200)
 
       user_weights = Accounts.get_user_weights(user.id)
       assert response == render_json(UserWeightView, "index.json", user_weights: user_weights)
     end
 
-    test "with invalid weight id and authenticated user returns resource not found error", %{conn: conn, user: user} do
+    test "with invalid weight id and authenticated user returns resource not found error", %{
+      conn: conn,
+      user: user
+    } do
       conn = delete(secure_conn(conn, user), Routes.user_weight_path(conn, :delete, -1))
       assert response = json_response(conn, 404)
     end
 
-    test "with no authenticated user returns error message", %{conn: conn, user_weight: user_weight} do
+    test "with no authenticated user returns error message", %{
+      conn: conn,
+      user_weight: user_weight
+    } do
       conn = delete(conn, Routes.user_weight_path(conn, :delete, user_weight.id))
       assert response = json_response(conn, 403)
       assert response == %{"message" => "Not Authenticated"}
