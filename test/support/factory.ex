@@ -31,7 +31,7 @@ defmodule Weightroom.Factory do
       comments: "Some Comments",
       week: 0,
       day: 0,
-      order: sequence(:order, &(&1)),
+      order: sequence(:order, & &1),
       program: build(:program)
     }
   end

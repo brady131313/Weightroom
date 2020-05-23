@@ -136,7 +136,6 @@ defmodule Weightroom.ProgramsTest do
   end
 
   describe "workouts" do
-
     @valid_attrs %{week: 0, day: 0, order: 0, comments: "Some Comments"}
     @update_attrs %{week: 1, day: 1, order: 1, comments: "Update Comments"}
     @invalid_attrs %{week: nil, day: nil, order: nil, comments: nil}
@@ -149,13 +148,17 @@ defmodule Weightroom.ProgramsTest do
     end
 
     @tag :without_workout
-    test "get_program_workout/1 returns all of a programs workouts with valid program", %{program: program} do
+    test "get_program_workout/1 returns all of a programs workouts with valid program", %{
+      program: program
+    } do
       assert Programs.get_program_workouts(program.id) == []
 
       workouts = insert_list(5, :workout, program: program)
       expected_workout_ids = workouts |> Enum.map(fn workout -> workout.id end)
 
-      actual_workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+      actual_workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
       assert expected_workout_ids == actual_workout_ids
     end
 
@@ -164,21 +167,79 @@ defmodule Weightroom.ProgramsTest do
     end
 
     @tag :without_workout
-    test "preload_program_workouts/1 with valid program returns program preloaded with workouts", %{program: program} do
+    test "preload_program_workouts/1 with valid program returns program preloaded with workouts",
+         %{program: program} do
       assert Programs.preload_program_workouts(program).workouts == []
 
       workouts = insert_list(5, :workout, program: program)
       expected_workout_ids = workouts |> Enum.map(fn workout -> workout.id end)
 
-      actual_workout_ids = Programs.preload_program_workouts(program).workouts |> Enum.map(fn workout -> workout.id end)
+      actual_workout_ids =
+        Programs.preload_program_workouts(program).workouts
+        |> Enum.map(fn workout -> workout.id end)
+
       assert expected_workout_ids == actual_workout_ids
+    end
+
+    @tag :without_workout
+    test "reorder_workouts/2 with valid workout reordering returns updated list of workouts", %{
+      program: program
+    } do
+      workout1 = insert(:workout, week: 0, day: 0, order: 0, program: program)
+      workout2 = insert(:workout, week: 0, day: 0, order: 1, program: program)
+
+      expected_workout_ids = [workout1.id, workout2.id]
+
+      actual_workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
+      assert expected_workout_ids == actual_workout_ids
+
+      reorder = %{workout1.id => %{order: 1}, workout2.id => %{order: 0}}
+
+      assert {:ok, workouts} = Programs.reorder_workouts(program.id, reorder)
+      expected_workout_ids = [workout2.id, workout1.id]
+
+      actual_workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
+      assert expected_workout_ids == actual_workout_ids
+    end
+
+    @tag :without_workout
+    test "reorder_workouts/2 leaves unchanged workouts in the same place", %{program: program} do
+      workout1 = insert(:workout, week: 0, day: 0, order: 0, program: program)
+      workout2 = insert(:workout, week: 0, day: 0, order: 1, program: program)
+      workout3 = insert(:workout, week: 0, day: 0, order: 2, program: program)
+
+      expected_workout_ids = [workout1.id, workout2.id, workout3.id]
+      actual_workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+      assert expected_workout_ids == actual_workout_ids
+
+      reorder = %{workout1.id => %{order: 2}, workout3.id => %{order: 0}}
+      assert {:ok, workouts} = Programs.reorder_workouts(program.id, reorder)
+      
+      expected_workout_ids = [workout3.id, workout2.id, workout1.id]
+      actual_workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+      assert expected_workout_ids == actual_workout_ids
+    end
+
+    @tag :without_workout
+    test "reorder_workouts/2 with invalid reordering returns an error", %{program: program} do
+      workout1 = insert(:workout, week: 0, day: 0, order: 0, program: program)
+      _workout2 = insert(:workout, week: 0, day: 0, order: 1, program: program)
+
+      reorder = %{workout1.id => %{order: 1}}
+      assert {:error, _} = Programs.reorder_workouts(program.id, reorder)
     end
 
     @tag :without_workout
     test "create_workout/1 with valid data returns new workout", %{program: program} do
       assert Programs.get_program_workouts(program.id) == []
 
-      assert {:ok, workout} = Programs.create_workout(Map.merge(@valid_attrs, %{program_id: program.id}))
+      assert {:ok, workout} =
+               Programs.create_workout(Map.merge(@valid_attrs, %{program_id: program.id}))
+
       assert Programs.get_program_workouts(program.id) == [workout]
 
       assert workout.week == @valid_attrs.week
@@ -189,7 +250,9 @@ defmodule Weightroom.ProgramsTest do
 
     @tag :without_workout
     test "create_workout/1 with invalid data returns error changeset", %{program: program} do
-      assert {:error, %Ecto.Changeset{}} = Programs.create_workout(Map.merge(@invalid_attrs, %{program_id: program.id}))
+      assert {:error, %Ecto.Changeset{}} =
+               Programs.create_workout(Map.merge(@invalid_attrs, %{program_id: program.id}))
+
       assert Programs.get_program_workouts(program.id) == []
     end
 
@@ -205,8 +268,13 @@ defmodule Weightroom.ProgramsTest do
       assert {:error, %Ecto.Changeset{}} = Programs.update_workout(workout, @invalid_attrs)
     end
 
-    test "delete_workout/1 with valid workout returns the deleted workout", %{program: program, workout: workout} do
-      workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+    test "delete_workout/1 with valid workout returns the deleted workout", %{
+      program: program,
+      workout: workout
+    } do
+      workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
       assert workout_ids == [workout.id]
 
       assert {:ok, %Workout{}} = Programs.delete_workout(workout)
@@ -237,12 +305,16 @@ defmodule Weightroom.ProgramsTest do
       assert Keyword.has_key?(changeset.errors, :order)
     end
 
-    test "change_workout/2 with two workouts in same order returns error changeset", %{program: program} do
+    test "change_workout/2 with two workouts in same order returns error changeset", %{
+      program: program
+    } do
       workout1 = insert(:workout, program: program)
       workout2 = insert(:workout, program: program)
 
       invalid_update = %{week: workout1.week, day: workout1.day, order: workout1.order}
-      assert {:error, %Ecto.Changeset{} = changeset} = Programs.update_workout(workout2, invalid_update)
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Programs.update_workout(workout2, invalid_update)
     end
   end
 end
