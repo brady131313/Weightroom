@@ -35,4 +35,13 @@ defmodule Weightroom.Factory do
       program: build(:program)
     }
   end
+
+  def exercise_factory do
+    %Weightroom.Programs.Exercise{
+      name: sequence("exercise"),
+      muscles: ["Pecs", "Triceps", "Shoulders"],
+      public: true,
+      created_by: build(:user)
+    }
+  end
 end

@@ -64,7 +64,7 @@ defmodule Weightroom.Programs do
   end
 
   def reorder_workouts(program_id, reorder) do
-    alias Ecto.{Multi, Changeset}
+    alias Ecto.Multi
     workout_ids = Map.keys(reorder)
 
     workouts =
@@ -74,18 +74,28 @@ defmodule Weightroom.Programs do
         )
       )
 
-      shift_workouts = Enum.reduce(workouts, Multi.new(), fn workout, multi ->
-         Multi.update(multi, {:shift_workout, workout.id}, Workout.changeset(workout, %{order: workout.order + 999}))
+    shift_workouts =
+      Enum.reduce(workouts, Multi.new(), fn workout, multi ->
+        Multi.update(
+          multi,
+          {:shift_workout, workout.id},
+          Workout.changeset(workout, %{order: workout.order + 999})
+        )
       end)
 
-      updated_workouts = Enum.reduce(workouts, shift_workouts, fn workout, multi ->
-        Multi.update(multi, {:update_workout, workout.id}, Workout.changeset(workout, reorder[workout.id]))
+    updated_workouts =
+      Enum.reduce(workouts, shift_workouts, fn workout, multi ->
+        Multi.update(
+          multi,
+          {:update_workout, workout.id},
+          Workout.changeset(workout, reorder[workout.id])
+        )
       end)
 
-      case Repo.transaction(updated_workouts) do
-        {:ok, _} -> {:ok, get_program_workouts(program_id)}
-        _ -> {:error, "Workouts must have unique positioning"}
-      end
+    case Repo.transaction(updated_workouts) do
+      {:ok, _} -> {:ok, get_program_workouts(program_id)}
+      _ -> {:error, "Workouts must have unique positioning"}
+    end
   end
 
   def preload_program_workouts(%Program{} = program) do

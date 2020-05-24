@@ -2,7 +2,7 @@ defmodule Weightroom.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Accounts.UserWeight
-  alias Weightroom.Programs.Program
+  alias Weightroom.Programs.{Program, Exercise}
 
   schema "users" do
     field :email, :string
@@ -11,6 +11,7 @@ defmodule Weightroom.Accounts.User do
 
     has_many :weights, UserWeight
     has_many :programs, Program
+    has_many :exercises, Exercise
 
     timestamps()
   end

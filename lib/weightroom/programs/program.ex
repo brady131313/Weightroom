@@ -8,7 +8,7 @@ defmodule Weightroom.Programs.Program do
     field :description, :string
     field :likes, :integer, default: 0
     field :name, :string
-    field :public, :boolean
+    field :public, :boolean, default: false
 
     belongs_to :author, User, foreign_key: :user_id
     has_many :workouts, Workout

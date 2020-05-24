@@ -213,14 +213,20 @@ defmodule Weightroom.ProgramsTest do
       workout3 = insert(:workout, week: 0, day: 0, order: 2, program: program)
 
       expected_workout_ids = [workout1.id, workout2.id, workout3.id]
-      actual_workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
+      actual_workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
       assert expected_workout_ids == actual_workout_ids
 
       reorder = %{workout1.id => %{order: 2}, workout3.id => %{order: 0}}
       assert {:ok, workouts} = Programs.reorder_workouts(program.id, reorder)
-      
+
       expected_workout_ids = [workout3.id, workout2.id, workout1.id]
-      actual_workout_ids = Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
+      actual_workout_ids =
+        Programs.get_program_workouts(program.id) |> Enum.map(fn workout -> workout.id end)
+
       assert expected_workout_ids == actual_workout_ids
     end
 
