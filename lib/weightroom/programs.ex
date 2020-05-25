@@ -102,25 +102,4 @@ defmodule Weightroom.Programs do
   def preload_program_workouts(%Program{} = program) do
     Repo.preload(program, :workouts)
   end
-
-  def create_workout(attrs \\ %{}) do
-    %Workout{}
-    |> Workout.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def update_workout(%Workout{} = workout, attrs \\ %{}) do
-    workout
-    |> Workout.changeset(attrs)
-    |> Repo.update()
-  end
-
-  def delete_workout(%Workout{} = workout) do
-    workout
-    |> Repo.delete()
-  end
-
-  def change_workout(%Workout{} = workout, attrs \\ %{}) do
-    Workout.changeset(workout, attrs)
-  end
 end

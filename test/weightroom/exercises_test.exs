@@ -16,7 +16,8 @@ defmodule Weightroom.ExercisesTest do
       {:ok, user} =
         Auth.register(%{username: "test", email: "test@mail.com", password: "password"})
 
-      exercise = unless context[:without_exercise], do: insert(:exercise, public: false, created_by: user)
+      exercise =
+        unless context[:without_exercise], do: insert(:exercise, public: false, created_by: user)
 
       {:ok, %{user: user, exercise: exercise}}
     end
@@ -74,7 +75,10 @@ defmodule Weightroom.ExercisesTest do
     @tag :without_exercise
     test "create_exercise/1 with valid data returns new exercise", %{user: user} do
       assert Exercises.list_exercises() == []
-      assert {:ok, exercise} = Exercises.create_exercise(Map.merge(@valid_attrs, %{user_id: user.id}))
+
+      assert {:ok, exercise} =
+               Exercises.create_exercise(Map.merge(@valid_attrs, %{user_id: user.id}))
+
       assert Exercises.list_exercises() == [exercise]
 
       assert exercise.name == @valid_attrs.name
@@ -83,7 +87,9 @@ defmodule Weightroom.ExercisesTest do
 
     @tag :without_exercise
     test "create_exercise/1 with invalid data returns error changeset", %{user: user} do
-      assert {:error, %Ecto.Changeset{}} = Exercises.create_exercise(Map.merge(@invalid_attrs, %{user_id: user.id}))
+      assert {:error, %Ecto.Changeset{}} =
+               Exercises.create_exercise(Map.merge(@invalid_attrs, %{user_id: user.id}))
+
       assert Exercises.list_exercises() == []
     end
 
@@ -120,7 +126,12 @@ defmodule Weightroom.ExercisesTest do
       changeset = Exercises.change_exercise(exercise, Map.merge(@valid_attrs, %{muscles: []}))
       assert Keyword.has_key?(changeset.errors, :muscles)
 
-      changeset = Exercises.change_exercise(exercise, Map.merge(@valid_attrs, %{muscles: ["a", "b", "c", "d"]}))
+      changeset =
+        Exercises.change_exercise(
+          exercise,
+          Map.merge(@valid_attrs, %{muscles: ["a", "b", "c", "d"]})
+        )
+
       assert Keyword.has_key?(changeset.errors, :muscles)
     end
   end
