@@ -27,7 +27,7 @@ defmodule Weightroom.Factory do
   end
 
   def workout_factory do
-    %Weightroom.Programs.Workout{
+    %Weightroom.Workouts.Workout{
       comments: "Some Comments",
       week: 0,
       day: 0,

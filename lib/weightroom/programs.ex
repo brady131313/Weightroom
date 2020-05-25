@@ -3,7 +3,8 @@ defmodule Weightroom.Programs do
   alias Weightroom.Repo
 
   alias Weightroom.Accounts.User
-  alias Weightroom.Programs.{Program, Workout}
+  alias Weightroom.Workouts.Workout
+  alias Weightroom.Programs.Program
 
   def list_programs do
     Repo.all(

@@ -2,6 +2,7 @@ defmodule Weightroom.Programs.Exercise do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Accounts.User
+  alias Weightroom.Workouts.ExerciseUnit
 
   schema "exercises" do
     field :muscles, {:array, :string}
@@ -9,6 +10,7 @@ defmodule Weightroom.Programs.Exercise do
     field :public, :boolean, default: false
 
     belongs_to :created_by, User, foreign_key: :user_id
+    has_many :exercise_units, ExerciseUnit
 
     timestamps()
   end

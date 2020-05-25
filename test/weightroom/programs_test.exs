@@ -4,7 +4,8 @@ defmodule Weightroom.ProgramsTest do
   import Weightroom.Factory
 
   alias Weightroom.Programs
-  alias Weightroom.Programs.{Program, Workout}
+  alias Weightroom.Workouts.Workout
+  alias Weightroom.Programs.Program
   alias Weightroom.Accounts.Auth
 
   describe "programs" do

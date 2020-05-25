@@ -1,4 +1,4 @@
-defmodule Weightroom.Programs.Workout do
+defmodule Weightroom.Workouts.Workout do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Programs.Program

@@ -2,7 +2,7 @@ defmodule Weightroom.Programs.Program do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Accounts.User
-  alias Weightroom.Programs.Workout
+  alias Weightroom.Workouts.Workout
 
   schema "programs" do
     field :description, :string
