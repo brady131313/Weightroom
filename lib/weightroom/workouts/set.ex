@@ -1,7 +1,7 @@
 defmodule Weightroom.Workouts.Set do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Weightroom.Programs.ExerciseUnit
+  alias Weightroom.Workouts.ExerciseUnit
 
   schema "sets" do
     field :order, :integer
