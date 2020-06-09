@@ -24,4 +24,10 @@ defmodule Weightroom.Workouts.Set do
     |> unique_constraint([:exercise_unit_id, :order])
     |> assoc_constraint(:exercise_unit)
   end
+
+  def assoc_changeset(set, attrs) do
+    set
+    |> cast(attrs, @required_fields)
+    |> assoc_constraint(:exercise_unit)
+  end
 end

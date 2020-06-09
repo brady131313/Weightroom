@@ -234,6 +234,5 @@ defmodule Weightroom.ProgramsTest do
       reorder = %{workout1.id => %{order: 1}}
       assert {:error, _} = Programs.reorder_workouts(program.id, reorder)
     end
-
   end
 end

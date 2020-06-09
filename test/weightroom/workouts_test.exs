@@ -23,15 +23,29 @@ defmodule Weightroom.WorkoutsTest do
     test "create_workout/1 with valid data returns new workout", %{program: program} do
       assert Programs.get_program_workouts(program.id) == []
 
-      assert {:ok, workout} =
-               Workouts.create_workout(Map.merge(@valid_attrs, %{program_id: program.id}))
+      exercise = insert(:exercise)
 
-      assert Programs.get_program_workouts(program.id) == [workout]
+      exercise_unit = %{
+        order: 0,
+        exercise_id: exercise.id,
+        sets: [
+          %{order: 0, reps: 5, weight: 10},
+          %{order: 1, reps: 5, weight: 10}
+        ]
+      }
 
+      params = Map.merge(@valid_attrs, %{program_id: program.id, exercise_units: [exercise_unit]})
+      assert {:ok, workout} = Workouts.create_workout(params)
       assert workout.week == @valid_attrs.week
       assert workout.day == @valid_attrs.day
       assert workout.order == @valid_attrs.order
-      assert workout.comments == @valid_attrs.comments
+
+      workout = Workouts.preload_workout_exercise_units(workout)
+      actual_exercise_unit = hd(workout.exercise_units)
+      assert actual_exercise_unit.exercise.name == exercise.name
+      assert actual_exercise_unit.sets |> Enum.map(fn set -> set.order end) == [0, 1] 
+
+      IO.inspect(workout)
     end
 
     @tag :without_workout

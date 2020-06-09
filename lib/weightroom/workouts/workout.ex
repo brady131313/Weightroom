@@ -2,6 +2,7 @@ defmodule Weightroom.Workouts.Workout do
   use Ecto.Schema
   import Ecto.Changeset
   alias Weightroom.Programs.Program
+  alias Weightroom.Workouts.ExerciseUnit
 
   schema "workouts" do
     field :comments, :string
@@ -10,6 +11,7 @@ defmodule Weightroom.Workouts.Workout do
     field :week, :integer
 
     belongs_to :program, Program
+    has_many :exercise_units, ExerciseUnit
 
     timestamps()
   end
